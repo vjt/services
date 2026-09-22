@@ -1176,7 +1176,7 @@ void handle_oper(CSTR source, User *callerUser, ServiceCommandData *data) {
 
 					/* Granting the akill capability is never a self-service operation:
 					   unlike ENABLED, an oper cannot set this one on his own entry. */
-					if (access_denied || str_equals_nocase(callerUser->oper->nick, opernick)) {
+					if (access_denied || (callerUser->oper == oper)) {
 
 						send_notice_to_user(data->agent->nick, callerUser, "Access denied.");
 						return;
