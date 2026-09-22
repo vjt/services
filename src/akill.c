@@ -494,6 +494,9 @@ void akill_add(CSTR source, CSTR username, CSTR host, CSTR reason, const BOOL ma
 			break;
 
 		default:
+			/* Carry over whatever type the caller asked for: AKILL_TYPE_NONE ors
+			   nothing, so the hand-typed akills keep coming out as before. */
+			AddFlag(akill->type, type);
 			akill->reason = str_duplicate(reason);
 			break;
 	}
