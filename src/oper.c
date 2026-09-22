@@ -1087,7 +1087,7 @@ void handle_oper(CSTR source, User *callerUser, ServiceCommandData *data) {
 				}
 
 				/* Un oper puo' modificare sé stesso, ma non auto-disabilitarsi. */
-				if (access_denied && str_not_equals_nocase(callerUser->oper->nick, opernick)) {
+				if (access_denied && (callerUser->oper != oper)) {
 
 					send_notice_to_user(data->agent->nick, callerUser, "Access denied.");
 					return;
