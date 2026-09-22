@@ -736,7 +736,7 @@ void handle_akill(CSTR source, User *callerUser, ServiceCommandData *data) {
 
 		char			akill_nicks[IRCBUFSIZE];
 		char			*expiry = NULL, *username, *host, *reason, *ptr;
-		BOOL			too_many_akill_nicks = FALSE, more_nicks = FALSE, have_CIDR = FALSE;
+		BOOL			too_many_akill_nicks = FALSE, more_nicks = FALSE, have_CIDR = FALSE, by_apm;
 		size_t			user_len, host_len;
 		User			*user;
 		int				akillIdx, usercount = 0, expireTime = CONF_DEFAULT_AKILL_EXPIRY;
@@ -981,10 +981,13 @@ void handle_akill(CSTR source, User *callerUser, ServiceCommandData *data) {
 			send_notice_to_user(data->agent->nick, callerUser, "\2Notice:\2 Services is in read-only mode. Changes will not be saved!");
 
 		/* Akills added by a proxy monitor carry their own type, so that LIST, INFO
-		   and the AKILL ID shown to users tell them apart from the manual ones. */
-		akill_add(data->operName, username, host, reason, TRUE, have_CIDR, &cidr,
-			(IS_NOT_NULL(callerUser->oper) && FlagSet(callerUser->oper->flags, OPER_FLAG_AKILL_PROXY))
-				? (AKILL_TYPE_BY_APM | AKILL_TYPE_PROXY) : AKILL_TYPE_NONE,
+		   and the AKILL ID shown to users tell them apart from the manual ones.
+		   They are not manual either: nobody typed them, so they must not answer
+		   to AKILL LIST MANUAL nor show up as "M". */
+		by_apm = (IS_NOT_NULL(callerUser->oper) && FlagSet(callerUser->oper->flags, OPER_FLAG_AKILL_PROXY));
+
+		akill_add(data->operName, username, host, reason, (by_apm ? FALSE : TRUE), have_CIDR, &cidr,
+			by_apm ? (AKILL_TYPE_BY_APM | AKILL_TYPE_PROXY) : AKILL_TYPE_NONE,
 			expireTime, 0, LANG_DEFAULT);
 	}
 	else if (str_equals_nocase(command, "DEL")) {
