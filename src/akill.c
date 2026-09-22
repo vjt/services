@@ -977,7 +977,12 @@ void handle_akill(CSTR source, User *callerUser, ServiceCommandData *data) {
 		if (CONF_SET_READONLY)
 			send_notice_to_user(data->agent->nick, callerUser, "\2Notice:\2 Services is in read-only mode. Changes will not be saved!");
 
-		akill_add(data->operName, username, host, reason, TRUE, have_CIDR, &cidr, AKILL_TYPE_NONE, expireTime, 0, LANG_DEFAULT);
+		/* Akills added by a proxy monitor carry their own type, so that LIST, INFO
+		   and the AKILL ID shown to users tell them apart from the manual ones. */
+		akill_add(data->operName, username, host, reason, TRUE, have_CIDR, &cidr,
+			(IS_NOT_NULL(callerUser->oper) && FlagSet(callerUser->oper->flags, OPER_FLAG_AKILL_PROXY))
+				? (AKILL_TYPE_BY_APM | AKILL_TYPE_PROXY) : AKILL_TYPE_NONE,
+			expireTime, 0, LANG_DEFAULT);
 	}
 	else if (str_equals_nocase(command, "DEL")) {
 
